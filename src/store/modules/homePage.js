@@ -9,9 +9,6 @@ axios.get('/questions').then(response => {
 axios.get('/userInfo').then(response => {
     console.log(response.data);
 });
-axios.get('/history').then(response => {
-    console.log(response.data);
-});
 
 let mock = new MockAdapter(axios);
 
@@ -85,6 +82,28 @@ const actions = {
         // other status code
         throw new Error(`result message:  ${res.message}`);
     },
+    async fetchHistory ({ commit }) {
+        if (!state.historyBetOptions.length) commit('setHistoryBetOptions', []);
+        else axios.get('/history').then(response => {
+            console.log(response.data);
+            // dispatch to set History Data
+        });
+
+        // const url = 'https://979a61c8-02cc-437b-9be5-fcc5f59bd77e.mock.pstmn.io/api/v1/user/profile/';
+        // const requestOptions = {
+        //     method: 'GET',
+        //     redirect: 'follow'
+        // };
+        // const response = await fetch(url, requestOptions);
+        // const res = await response.json();
+        // if (response.status === 200) {
+        //     const userInfo = res.data;
+        //     dispatch('setUserInfo', { userInfo });
+        //     return;
+        // }
+        // // other status code
+        // throw new Error(`result message:  ${res.message}`);
+    },
     setUserInfo ({ commit }, { userInfo }) {
         commit('onSignIn', userInfo);
         commit('setIsLogin', true);
@@ -115,6 +134,7 @@ const actions = {
         commit('updateUserInfo', calcChips);
         commit('setHistoryBetOptions', state.chosenOptions.filter(Boolean));
         commit('setChosenOptions', []);
+        mock.onGet('/history').reply(200, { ...state.historyBetOptions });
     },
     adminLogin ({ commit }) {
         commit('setIsLogin', true);
@@ -184,10 +204,6 @@ const mutations = {
     },
     setHistoryBetOptions (state, historyBetOptions) {
         state.historyBetOptions = state.historyBetOptions.concat(historyBetOptions);
-        mock.onGet('/history').reply(200, {...state.historyBetOptions });
-        axios.get('/history').then(response => {
-            console.log(response.data);
-        });
     },
     setBetSum (state, betSum) {
         state.betSum = betSum;

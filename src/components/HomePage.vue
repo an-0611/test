@@ -89,36 +89,38 @@
             <!-- HomePageContent -->
             <div id="HomePageContent" v-if="selectedPagination === 'HomePage'">
               <Loading v-if="fetchQuestionLoading" />
-              <NoData v-if="(!isLogin && isVisitorsQuestions.length === 0) || (!fetchQuestionLoading && isVisitorsQuestions.length === 0)" text="questions" />
-              <div v-if="!fetchQuestionLoading && isVisitorsQuestions.length > 0">
-                <div class="question-box" v-for="(question, index) in isVisitorsQuestions" :key="question.id">
-                  <p class="question-title">Q{{ index + 1 }}. {{ question.title }}</p>
-                  <span class="odd">* Odds: {{ question.options[0].odds }}</span>
-                  <ul>
-                      <li v-for="option in question.options" :key="option.id">
-                          <input type="radio" :name="question.id" :value="option.id" @change="updateOption(question, index, $event)" :disabled="!isLogin || waitingResult || getResult" :checked="chosenOptions[index] && chosenOptions[index].option_id === option.id">
-                          {{ option.title }}
-                      </li>
-                      <div v-if="chosenOptions[index] && isLogin">
-                        <input class="bettingInput" type="number" :max='userInfo.chips - betSum' :min="0" @change="updateBet(index, $event)" v-model.number="chosenOptions[index].chips" :disabled="!isLogin || waitingResult || getResult">
-                      </div>
-                  </ul>
+              <div v-else>
+                <NoData v-if="(!isLogin && !isVisitorsQuestions.length) || !isVisitorsQuestions.length" text="questions" />
+                <div v-if="!fetchQuestionLoading && isVisitorsQuestions.length">
+                  <div class="question-box" v-for="(question, index) in isVisitorsQuestions" :key="question.id">
+                    <p class="question-title">Q{{ index + 1 }}. {{ question.title }}</p>
+                    <span class="odd">* Odds: {{ question.options[0].odds }}</span>
+                    <ul>
+                        <li v-for="option in question.options" :key="option.id">
+                            <input type="radio" :name="question.id" :value="option.id" @change="updateOption(question, index, $event)" :disabled="!isLogin || waitingResult || getResult" :checked="chosenOptions[index] && chosenOptions[index].option_id === option.id">
+                            {{ option.title }}
+                        </li>
+                        <div v-if="chosenOptions[index] && isLogin">
+                          <input class="bettingInput" type="number" :max='userInfo.chips - betSum' :min="0" @change="updateBet(index, $event)" v-model.number="chosenOptions[index].chips" :disabled="!isLogin || waitingResult || getResult">
+                        </div>
+                    </ul>
 
-                  <!-- result section => show when event expired-->
-                  <div v-if="chosenOptions[index]">
-                    <div v-if="getResult && isLogin">
-                      <div class="resultInfo" :class="{ green: chosenOptions[index].option_id === question.answer.id }">
-                        <p>Correct Answer: {{ question.answer.title }}</p>
-                        <p>Bonus chips earned: {{ chosenOptions[index] && chosenOptions[index].option_id === question.answer.id ? (chosenOptions[index].chips * question.options[0].odds) : '0' }}</p>
+                    <!-- result section => show when event expired-->
+                    <div v-if="chosenOptions[index]">
+                      <div v-if="getResult && isLogin">
+                        <div class="resultInfo" :class="{ green: chosenOptions[index].option_id === question.answer.id }">
+                          <p>Correct Answer: {{ question.answer.title }}</p>
+                          <p>Bonus chips earned: {{ chosenOptions[index] && chosenOptions[index].option_id === question.answer.id ? (chosenOptions[index].chips * question.options[0].odds) : '0' }}</p>
+                        </div>
                       </div>
                     </div>
+                    <!-- result section end -->
                   </div>
-                  <!-- result section end -->
-                  </div>
+                </div>
               </div>
 
               <!-- btn section -->
-              <div v-if="isLogin && isVisitorsQuestions.length !== 0 && questions.length - isVisitorsQuestions.length - filterHistoryBetOptions.length >= 0">
+              <div v-if="isLogin && isVisitorsQuestions.length && questions.length - isVisitorsQuestions.length - filterHistoryBetOptions.length >= 0">
                 <button v-if="!waitingResult" class="confirmBtn margin-filling-50" @click="showPopup">{{ getResult ? 'Claim bonus chips' : 'confirm' }}</button>
                 <div v-else class="margin-filling-50">Waiting for result to be revealed</div>
               </div>
